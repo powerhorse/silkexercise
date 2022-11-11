@@ -4,3 +4,5 @@ CREATE_TABLE = """  CREATE TABLE IF NOT EXISTS tickets (
 INSERT_ROW_TICKET = """ INSERT OR IGNORE INTO tickets(ticket_id, time)
                         VALUES(?,?)
                     """
+READ_TIME = """ SELECT time from tickets
+            """

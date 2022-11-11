@@ -2,6 +2,8 @@
 # from sqlite_consts import CREATE_TABLE
 import sqlite3
 
+from interfaces.db.sqlite.sqlite_consts import READ_TIME
+
 class SQLiteInterface(object):
     def __init__(self, data_path):
         try:
@@ -15,7 +17,6 @@ class SQLiteInterface(object):
             raise Exception('Cannot make connection to the underlying DB')
         try:
             if self._cursor is not None:
-                print(sql_str)
                 self._cursor.execute(sql_str)
         finally:
             self._connection.commit()
@@ -27,11 +28,11 @@ class SQLiteInterface(object):
         finally:
             self._connection.commit()
 
-    def read_all_data(self, table_name):
+    def read_all_data(self):
+        rows = []
         try:
-            self._cursor.execute('SELECT * from {}'.format(table_name))
+            self._cursor.execute(READ_TIME)
             rows = self._cursor.fetchall()
-            for row in rows:
-                print(row)
         except Exception as ex:
             print('Exception occurred: %s' % str(ex))
+        return rows
