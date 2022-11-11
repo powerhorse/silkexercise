@@ -3,19 +3,16 @@
 import sqlite3
 
 class SQLiteInterface(object):
-    def __init__(self):
-        self._connection = None
-        self._cursor = None
-    
-    def create_connection(self, data_path):
+    def __init__(self, data_path):
         try:
             self._connection = sqlite3.connect(data_path)
             self._cursor = self._connection.cursor()
         except Exception as e:
             print('Failed to create a DB connection to %s' % data_path)
-        return self._connection
-        
+    
     def create_table(self, sql_str):
+        if self._connection is None or self._cursor is None:
+            raise Exception('Cannot make connection to the underlying DB')
         try:
             if self._cursor is not None:
                 print(sql_str)
@@ -25,9 +22,16 @@ class SQLiteInterface(object):
     
     def add_rows(self, add_row_sql_str, tickets):
         try:
-            with self._cursor:
-                for ticket in tickets:
-                    self._cursor.execute(add_row_sql_str, ticket)
+            for ticket in tickets:
+                self._cursor.execute(add_row_sql_str, ticket)
         finally:
             self._connection.commit()
 
+    def read_all_data(self, table_name):
+        try:
+            self._cursor.execute('SELECT * from {}'.format(table_name))
+            rows = self._cursor.fetchall()
+            for row in rows:
+                print(row)
+        except Exception as ex:
+            print('Exception occurred: %s' % str(ex))

@@ -21,13 +21,13 @@ class JIRAInterface(object):
         self._issues = []
 
     def get_tickets(self):
-        search_str = 'project={}'.format(consts.JIRA_ID)
+        search_str = 'project={} AND priority in ({})'.format(consts.JIRA_ID, 'HIGH, HIGHEST')
         issues = self._connection.search_issues(search_str)
         
         ret = []
         for issue in issues:
             dt = datetime.strptime(issue.fields.created.split('.')[0], '%Y-%m-%dT%H:%M:%S')
-            ret.append([issue.key, dt])
+            ret.append([issue.key, int(dt.strftime('%s'))])
         # TODO: Maybe yield's better?
         return ret
     

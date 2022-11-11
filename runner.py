@@ -27,21 +27,24 @@ def create_tickets():
         print('Created ticket {}'.format(issue.key))
     print('All tickets created successfully')
 
-def get_tickets():
+def store_tickets():
     jira_obj = JIRAInterface()
-    jira_obj.get_tickets()
+    sql_intf = SQLiteInterface('test.db')
+    sql_intf.create_table(CREATE_TABLE)
+    tickets = jira_obj.get_tickets()
+    sql_intf.add_rows(INSERT_ROW_TICKET, tickets)
+    print('Finished writing into the DB')
+    print('Read from DB')
+    # sql_intf.read_all_data('tickets')
 
 def delete_tickets():
     jira_obj = JIRAInterface()
     jira_obj.delete_tickets()
 
 if __name__ == '__main__':
-    create_tickets()
-    get_tickets()
-    # delete_tickets()
+    #create_tickets()
+    store_tickets()
+    #delete_tickets()
+    # Plot for Graphana
+
     
-    #sql_interface = SQLiteInterface()
-    #sql_interface.create_connection("test.db")
-    #sql_interface.create_table(CREATE_TABLE)
-    # get tickets from jira_obj
-    # write data into the table.
