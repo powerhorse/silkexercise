@@ -3,7 +3,7 @@
 import sqlite3
 
 class SQLiteInterface(object):
-    def __init__(self, data_path):
+    def __init__(self):
         self._connection = None
         self._cursor = None
     
@@ -18,6 +18,7 @@ class SQLiteInterface(object):
     def create_table(self, sql_str):
         try:
             if self._cursor is not None:
+                print(sql_str)
                 self._cursor.execute(sql_str)
         finally:
             self._connection.commit()

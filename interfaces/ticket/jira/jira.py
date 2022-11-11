@@ -7,6 +7,7 @@ Interact with JIRA as a ticketing subsystem.
 from jira import JIRA
 from random import choice
 from . import consts as consts
+from datetime import datetime
 
 class JIRAInterface(object):
     def __init__(self, email=consts.JIRA_EMAIL,
@@ -15,12 +16,27 @@ class JIRAInterface(object):
         """
         The JIRA interface provides the ability to CRUD jira tickets.
         """
-        self._connection = JIRA(basic_auth=(email, token), server=server)
+        options = {'server': server}
+        self._connection = JIRA(options, basic_auth=(email, token))
         self._issues = []
 
     def get_tickets(self):
-        return self._issues
-
+        search_str = 'project={}'.format(consts.JIRA_ID)
+        issues = self._connection.search_issues(search_str)
+        
+        ret = []
+        for issue in issues:
+            dt = datetime.strptime(issue.fields.created.split('.')[0], '%Y-%m-%dT%H:%M:%S')
+            ret.append([issue.key, dt])
+        # TODO: Maybe yield's better?
+        return ret
+    
+    def delete_tickets(self):
+        search_str = 'project={}'.format(consts.JIRA_ID)
+        issues = self._connection.search_issues(search_str)
+        for issue in issues:
+            issue.delete()
+        
     def create_ticket(self, project_id, description, summary, ticket_type=None, priority=None, randomize=True):
         """
         This function creates a ticket using some randomness unless explicitly specified by the creator.
@@ -51,7 +67,6 @@ class JIRAInterface(object):
             'issuetype': {'name': issue_type},
             'priority': {'name': issue_priority}}
 
-        print(issue_dict)
         new_issue = self._connection.create_issue(fields=issue_dict)
         self._issues.append(new_issue)
         return new_issue
