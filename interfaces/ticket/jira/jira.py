@@ -10,29 +10,29 @@ from . import consts as consts
 from datetime import datetime
 
 class JIRAInterface(object):
-    def __init__(self, email=consts.JIRA_EMAIL,
-                token=consts.JIRA_TOKEN,
-                server=consts.JIRA_SERVER):
+    def __init__(self, jira_consts):
         """
         The JIRA interface provides the ability to CRUD jira tickets.
         """
+        server = jira_consts['server']
+        email = jira_consts['user']
+        token = jira_consts['token']
+        self.__project = jira_consts['project']
         options = {'server': server}
         self._connection = JIRA(options, basic_auth=(email, token))
-        self._issues = []
 
     def get_tickets(self):
-        search_str = 'project={} AND priority in ({})'.format(consts.JIRA_ID, 'HIGH, HIGHEST')
+        search_str = 'project={} AND priority in ({})'.format(self.__project, 'HIGH, HIGHEST')
         issues = self._connection.search_issues(search_str)
         
         ret = []
         for issue in issues:
             dt = datetime.strptime(issue.fields.created.split('.')[0], '%Y-%m-%dT%H:%M:%S')
             ret.append([issue.key, int(dt.strftime('%s'))])
-        # TODO: Maybe yield's better?
         return ret
     
     def delete_tickets(self):
-        search_str = 'project={}'.format(consts.JIRA_ID)
+        search_str = 'project={}'.format(self.__project)
         issues = self._connection.search_issues(search_str)
         for issue in issues:
             issue.delete()
